@@ -1,0 +1,21 @@
+{
+  "name": "spliton",
+  "version": "0.0.1",
+  "manifest_version": 2,
+
+  "description": "spliton",
+
+  "content_scripts": [
+    {
+      "js": [ "jquery-1.10.2.min.js", "spliton.js" ],
+      "css": [ "spliton.css" ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "background": "background.html",
+  "options_page": "option.html"
+}
