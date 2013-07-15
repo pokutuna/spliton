@@ -181,11 +181,72 @@
       console.log('start');
       this._splitonActiveFlag = true;
       var pane = new Spliton.Pane();
+      this._rootPane = pane;
+      this.selectSpliton();
+    },
+
+    selectSpliton: function(){
+      var pane = this._rootPane;
       pane.updateStyles();
       document.body.appendChild(pane.asElement());
       var elem = pane.searchElement();
       this.vibrateElement(elem);
-      this._rootPane = pane;
+
+      var self = this;
+      this.registerKeyHandlerOnce(function(event) {
+        self.cancelSelection();
+        var key = CK.getKey(event);
+
+        // TODO config
+        switch (key) {
+        case 'q':
+          pane.resize(0, 3, 0, 2);
+          break;
+
+        case 'w':
+          pane.resize(1, 3, 0, 2);
+          break;
+
+        case 'e':
+          pane.resize(2, 3, 0, 2);
+          break;
+
+        case 'a':
+          pane.resize(0, 3, 1, 2);
+          break;
+
+        case 's':
+          pane.resize(1, 3, 1, 2);
+          break;
+
+        case 'd':
+          pane.resize(2, 3, 1, 2);
+          break;
+
+        // case 'z':
+        //   pane.resize(0, 3, 2, 3);
+        //   break;
+
+        // case 'x':
+        //   pane.resize(1, 3, 2, 3);
+        //   break;
+
+        // case 'c':
+        //   pane.resize(2, 3, 2, 3);
+        //   break;
+
+        case 'Enter':
+          Spliton.Util.trigger(elem, 'click');
+          return;
+          break;
+
+        default:
+          self.exitSpliton();
+          return;
+          break;
+        }
+        self.selectSpliton();
+      });
     },
 
     exitSpliton: function() {
@@ -245,6 +306,8 @@
       var elem = this.asElement();
       elem.style.top    = this.top;
       elem.style.left   = this.left;
+      elem.style.marginTop = this.top + 'px';
+      elem.style.marginLeft = this.left + 'px';
       elem.style.width  = this.width + 'px';
       elem.style.height = this.height + 'px';
     },
@@ -264,6 +327,13 @@
       };
     },
 
+    resize: function(xIndex, xSize, yIndex, ySize) {
+      this.width = this.width / xSize;
+      this.height = this.height / ySize;
+      this.left = this.left + this.width * xIndex;
+      this.top = this.top + this.height * yIndex;
+    },
+
     _searchRadians: (function() {
       var rs = [0.5, 0.75, 1.00, 1.25, 1.50, 1.75, 0.00, 0.25];
       for (var i = 0, size = rs.length; i < size; i++) {
@@ -277,7 +347,7 @@
       console.log(center);
       var px = center.x,
           py = center.y,
-          interval = 10, // TODO point interval configuration
+          interval = 5, // TODO point interval configuration
           right = this.left + this.width,
           bottom = this.top + this.height,
           element = null;
@@ -296,7 +366,7 @@
       while (this.left <= px && px <= right && this.top <= py && py <= bottom) {
         if (ridx >= this._searchRadians.length) {
           ridx = 0;
-          interval += 10;
+          interval += 5;
         }
         px = px + Math.cos(this._searchRadians[ridx]) * interval;
         py = py + Math.sin(this._searchRadians[ridx]) * interval;
@@ -326,7 +396,11 @@
   };
 
   Spliton.Util = {
+    trigger: function(elem, event){
+      elem.dispatchEvent(new Event(event));
+    },
     addClass: function(elem, className) {
+      if (!elem) return;
       var classes = elem.className.split(' ');
       for (var i = 0; i < classes.length; i++) {
         if (classes[i] === className) return;
@@ -334,6 +408,7 @@
       elem.className += (' ' + className);
     },
     removeClass: function(elem, className) {
+      if (!elem) return;
       var classes = elem.className.split(' '),
           newClassName = '';
       for (var i = 0; i < classes.length; i++) {
@@ -344,7 +419,6 @@
       }
       elem.className = newClassName;
     }
-
   }
 
   Spliton.init();
